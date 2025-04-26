@@ -11,6 +11,7 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -24,21 +25,21 @@ jobs:
         run: pip install pyyaml
 
       - name: Generate .md files for PDFs
-
-
         shell: bash
-        
         run: |
           mkdir -p _pdfs
-          for pdf in assets/pdf/*.pdf; do
-            [ -e "$pdf" ] || continue
-            filename=$(basename -- "$pdf")
-            name="${filename%.*}"
-            mdfile="_pdfs/$name.md"
-            if [ ! -f "$mdfile" ]; then
-              echo "Creating $mdfile"
-              today=$(date +%Y-%m-%d)
-              cat <<EOF > "$mdfile"
+          touch _pdfs/.gitkeep
+
+          if compgen -G "assets/pdf/*.pdf" > /dev/null; then
+            for pdf in assets/pdf/*.pdf; do
+              [ -e "$pdf" ] || continue
+              filename=$(basename -- "$pdf")
+              name="${filename%.*}"
+              mdfile="_pdfs/$name.md"
+              if [ ! -f "$mdfile" ]; then
+                echo "Creating $mdfile"
+                today=$(date +%Y-%m-%d)
+                cat <<EOF > "$mdfile"
 ---
 title: "${name//-/ }"
 date: $today
@@ -48,13 +49,16 @@ categories: [PDF]
 
 [Click here to view the PDF](/assets/pdf/$filename){:target="_blank"}
 EOF
-            fi
-          done
+              fi
+            done
+          else
+            echo "No PDFs found in assets/pdf/"
+          fi
 
       - name: Commit and push changes
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add _pdfs/*.md
+          git add _pdfs/
           git commit -m "Auto-generate PDF blog posts" || echo "No changes to commit"
           git push
