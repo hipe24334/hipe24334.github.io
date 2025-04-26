@@ -24,6 +24,7 @@ jobs:
         run: pip install pyyaml
 
       - name: Generate .md files for PDFs
+        shell: bash
         run: |
           mkdir -p _pdfs
           for pdf in assets/pdf/*.pdf; do
@@ -54,4 +55,3 @@ EOF
           git add _pdfs/*.md
           git commit -m "Auto-generate PDF blog posts" || echo "No changes to commit"
           git push
-
