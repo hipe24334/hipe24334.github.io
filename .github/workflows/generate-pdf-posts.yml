@@ -1,0 +1,56 @@
+name: Generate PDF Posts
+
+on:
+  push:
+    paths:
+      - 'assets/pdf/**'
+      - '_pdfs/**'
+    branches:
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Generate .md files for PDFs
+        run: |
+          mkdir -p _pdfs
+          for pdf in assets/pdf/*.pdf; do
+            [ -e "$pdf" ] || continue
+            filename=$(basename -- "$pdf")
+            name="${filename%.*}"
+            mdfile="_pdfs/$name.md"
+            if [ ! -f "$mdfile" ]; then
+              echo "Creating $mdfile"
+              today=$(date +%Y-%m-%d)
+              cat <<EOF > "$mdfile"
+---
+title: "${name//-/ }"
+date: $today
+layout: post
+categories: [PDF]
+---
+
+[Click here to view the PDF](/assets/pdf/$filename){:target="_blank"}
+EOF
+            fi
+          done
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add _pdfs/*.md
+          git commit -m "Auto-generate PDF blog posts" || echo "No changes to commit"
+          git push
