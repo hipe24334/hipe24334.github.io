@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'assets/pdf/**'
+      - '_pdfs/**'
+    branches:
+      - main
 
 jobs:
   generate:
