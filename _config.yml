@@ -224,3 +224,16 @@ jekyll-archives:
   permalinks:
     tag: /tags/:name/
     category: /categories/:name/
+
+collections:
+  pdfs:
+    output: true
+    permalink: /pdfs/:title/
+
+defaults:
+  - scope:
+      path: "_pdfs"
+      type: pdfs
+    values:
+      layout: post
+      categories: PDF
