@@ -24,6 +24,10 @@ jobs:
         run: pip install pyyaml
 
       - name: Generate .md files for PDFs
+
+
+        shell: bash
+        
         run: |
           mkdir -p _pdfs
           for pdf in assets/pdf/*.pdf; do
